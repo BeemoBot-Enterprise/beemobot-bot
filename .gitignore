@@ -1,0 +1,26 @@
+# Ignore Python compiled files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Ignore virtual environment directories
+venv/
+env/
+
+# Ignore environment variables file (you might have .env for storing API tokens)
+.env
+
+# Ignore IDE files (Visual Studio, VS Code, etc.)
+.vscode/
+.idea/
+
+# Ignore operating system-specific files
+.DS_Store    # macOS specific
+Thumbs.db    # Windows specific
+
+# Ignore dependencies installed by pip that aren't listed in requirements.txt
+*.egg-info/
+
+# Ignore log files
+*.log
