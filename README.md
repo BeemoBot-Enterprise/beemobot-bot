@@ -55,6 +55,10 @@ py -m pip --version
 ```bash
 pip install -r requirements.txt
 ```
+Si de nouveau modules ou librairies sont installés :
+```bash
+pip freeze > requirements.txt
+```
 
 #### 2. Lancer le bot
 
