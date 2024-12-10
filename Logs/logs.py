@@ -42,3 +42,6 @@ def verification_error(error_msg):
 
 def verification_success():
     logger.info('Verification succeeded')
+
+def log_info(info_msg):
+    logger.info(info_msg)
