@@ -11,7 +11,7 @@ def security_check():
     verify_env()
 
 def verify_env():
-    if os.getenv("BOT_TOKEN") is None or os.getenv("RIOT_API_KEY") is None or os.getenv("BOT_TOKEN") == "" or os.getenv("RIOT_API_KEY") == "":
+    if os.getenv("BOT_TOKEN_TEST") is None or os.getenv("RIOT_API_KEY") is None or os.getenv("BOT_TOKEN_TEST") == "" or os.getenv("RIOT_API_KEY") == "":
         print(Back.RED + "Please make sure the BOT_TOKEN and RIOT_API_KEY environment variable are set properly." + Style.RESET_ALL)
         verification_error("Environment variables are not set correctly")
         exit(1)
