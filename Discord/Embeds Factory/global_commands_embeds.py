@@ -1,0 +1,2 @@
+def user():
+    print('test')
