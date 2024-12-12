@@ -1,8 +1,7 @@
 import discord
 from discord import app_commands
 from Logs.logs import command_used
-from Riot.riot_api import *
-import typing
+from Discord.Embeds_Factory.global_commands_embeds import *
 
 def setup_global_commands(bot):
     # Define a slash command
@@ -21,5 +20,5 @@ def setup_global_commands(bot):
     @app_commands.describe(name="The summoner name")
     async def user(interaction: discord.Interaction, name: str):
         command_used("user", interaction.user)
-        await interaction.response.send_message(get_summoner_by_puuid(get_puuid_by_name(name)))
+        await interaction.response.send_message(embed = user_builder(name))
         # Add more commands here if needed
