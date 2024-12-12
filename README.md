@@ -16,7 +16,7 @@ TEMP
 
 Avant d'installer BeemoBot, assurez-vous d'avoir les éléments suivants installés sur votre système :
 
-1. [Python 3.8 ou supérieur](https://www.python.org/downloads/)
+1. [Python 3.11](https://www.python.org/downloads/)
 2. [Git](https://git-scm.com/) (optionnel pour cloner le dépôt)
 3. Le .env de l'application contennant les différentes clés API
 
