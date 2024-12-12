@@ -10,7 +10,8 @@ def Launch():
     security_check()
     
     # Run the bot
-    bot.run(bot_token_test) 
+    
+    bot.run(bot_token_test)
 
 if __name__ == "__main__":
     Launch()
