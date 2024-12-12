@@ -16,7 +16,7 @@ TEMP
 
 Avant d'installer BeemoBot, assurez-vous d'avoir les éléments suivants installés sur votre système :
 
-1. [Python 3.11](https://www.python.org/downloads/)
+1. [Python 3.11.0](https://www.python.org/downloads/)
 2. [Git](https://git-scm.com/) (optionnel pour cloner le dépôt)
 3. Le .env de l'application contennant les différentes clés API
 
@@ -27,7 +27,7 @@ Avant d'installer BeemoBot, assurez-vous d'avoir les éléments suivants install
 #### 1. Télécharger Python
 
 1. Accédez au site officiel de Python : [python.org](https://www.python.org/downloads/).
-2. Téléchargez et installez la version la plus récente de Python.
+2. Téléchargez et installez Python 3.11.0
 3. **Assurez-vous de cocher la case "Ajouter Python au PATH" lors de l'installation.**
 
 Pour vérifier que Python est correctement installé, ouvrez un terminal (ou PowerShell) et exécutez :
