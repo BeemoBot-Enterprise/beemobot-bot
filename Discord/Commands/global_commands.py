@@ -7,7 +7,7 @@ from Discord.Commands.embed_factory import *
 import typing
 
 
-# NE PAS TOUCHER
+# NE PAS TOUCHER SVP
 def setup_global_commands(bot):
     # Get full user info by summoner name and tag /user
     @bot.tree.command(name="user",
