@@ -23,10 +23,11 @@ def get_id_by_puuid_and_region(puuid, region):
     print("get_id_by_puuid_and_region")
     return lol_watcher.summoner.by_puuid(region, puuid)["id"]
 
-
 def get_user_id_by_name_tag_and_region(name, tag, region):
     print("get_user_id_by_name_tag_and_region")
-    return get_id_by_puuid_and_region(get_puuid_by_name_and_tag(name, tag), region)
+    GPBNAT = get_puuid_by_name_and_tag(name, tag)
+    GIBPAR = get_id_by_puuid_and_region(GPBNAT, region)
+    return GIBPAR
 # ================================================================================================
 def get_user_icon_id_by_user_id_and_region(id, region):
     print("get_user_icon_id_by_user_id_and_region")
@@ -38,7 +39,12 @@ def get_rank_by_id_and_region(id, region):
 
 def slash_user(name, tag, region):
     print("slash_user")
-    return get_icon_by_iconId(get_user_icon_id_by_user_id_and_region(get_user_id_by_name_tag_and_region(name, tag, region), region), lol_watcher, DEFAULT_REGION)
+    
+    GUIBNTAR = get_user_id_by_name_tag_and_region(name, tag, region)
+    GUIIBUIAR = get_user_icon_id_by_user_id_and_region(GUIBNTAR, region)
+    GIBI = get_icon_by_iconId(GUIIBUIAR, lol_watcher, region)
+    
+    return GIBI
 
 # print('rank :')
 # print(get_rank_by_id_and_region(get_user_id_by_name_tag_and_region("MFF电竞 VX WTWTTC", "LPL整队", "euw1"), "euw1"))
