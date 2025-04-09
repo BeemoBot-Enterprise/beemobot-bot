@@ -14,5 +14,11 @@ def setup_global_commands(bot):
                 description="get basic user infos")
     @app_commands.describe(name="The summoner name", tag="The tag of the user",region="The server region")
     async def self(interation: discord.Interaction,name:str , tag:str, region: typing.Literal["EUW","EUNE","NA","BR","JP","KR","LA","LAS","OC","TR","RU"]):
+        
         region=region_real_name(region)
-        await interation.response.send_message(embed=embed_user_info(get_rank_by_id_and_region(get_user_id_by_name_tag_and_region(name, tag, region), region), name, slash_user(name, tag, region)), ephemeral=True)
+        SU = slash_user(name, tag, region)
+        GUIBNTAR = get_user_id_by_name_tag_and_region(name, tag, region)
+        GRBIAR = get_rank_by_id_and_region(GUIBNTAR, region)
+        EUI = embed_user_info(GRBIAR, name, SU)
+        
+        await interation.response.send_message(embed=EUI, ephemeral=True)
