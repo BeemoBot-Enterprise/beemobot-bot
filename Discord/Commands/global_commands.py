@@ -2,23 +2,17 @@ import discord
 from discord import app_commands
 from Logs.logs import command_used
 from Discord.Embeds_Factory.global_commands_embeds import *
+from Riot.riot_watcher import *
+from Discord.Commands.embed_factory import *
+import typing
 
+
+# NE PAS TOUCHER SVP
 def setup_global_commands(bot):
-    # Define a slash command
-    @bot.tree.command(name="hello", description="Say hello!")
-    async def hello(interaction: discord.Interaction):
-        command_used("hello", interaction.user)
-        await interaction.response.send_message("Hello! 👋")
-
-    @bot.tree.command(name="ping", description="Check the bot's latency")
-    async def ping(interaction: discord.Interaction):
-        command_used("ping", interaction.user)
-        await interaction.response.send_message(f"Pong! 🏓 ({bot.latency * 1000:.0f}ms)")
-
+    # Get full user info by summoner name and tag /user
     @bot.tree.command(name="user",
-                description="get basic rank infos")
-    @app_commands.describe(name="The summoner name")
-    async def user(interaction: discord.Interaction, name: str):
-        command_used("user", interaction.user)
-        await interaction.response.send_message(embed = user_builder(name))
-        # Add more commands here if needed
+                description="get basic user infos")
+    @app_commands.describe(name="The summoner name", tag="The tag of the user",region="The server region")
+    async def self(interation: discord.Interaction,name:str , tag:str, region: typing.Literal["EUW","EUNE","NA","BR","JP","KR","LA","LAS","OC","TR","RU"]):
+        region=region_real_name(region)
+        await interation.response.send_message(embed=embed_user_info(get_rank_by_id_and_region(get_user_id_by_name_tag_and_region(name, tag, region), region), name, slash_user(name, tag, region)), ephemeral=True)
