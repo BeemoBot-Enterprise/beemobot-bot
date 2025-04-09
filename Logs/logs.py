@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 # Configure the logger
-LOG_FILE = 'logs/logs_holder/bot.log'
+LOG_FILE = 'Logs/logs_holder/bot.log'
 LOG_LEVEL = logging.INFO
 
 logging.basicConfig(
