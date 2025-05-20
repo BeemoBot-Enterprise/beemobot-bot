@@ -226,3 +226,16 @@ def embed_respect(name, tag, region, icon_link, shrooms, respects):
     embed.set_footer(text="provided by BeemoBot")
     embed.set_image(url=TeemoImages.BEEMO)
     return embed
+def embed_help_orion():
+    Icon = "https://cdn.discordapp.com/attachments/1301209240379199591/1374372873950466179/Minimalistic-vector-hd-rocket-clipart-simple-hd-fly-into-the_194958_wh860.png?ex=682dcffb&is=682c7e7b&hm=ac776562e6e341024b93b62b1c12811408d437df4fc255660c29c228192c680f&"
+    # Obtenir la couleur dominante de l'image
+    dominant_color = get_dominant_color(Icon)
+    color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
+    
+    embed = discord.Embed(
+        title="Message d'Orion",
+        description="Orion, le meilleur compagnon qu'un cosmonaute puisse avoir va vous guider pour la suite. Rendez-vous au stand de Stellar pour en apprendre plus sur lui.",
+        color=color_hex
+    )
+    embed.set_thumbnail(url=Icon)
+    return embed
