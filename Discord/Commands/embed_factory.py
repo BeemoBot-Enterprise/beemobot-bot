@@ -13,9 +13,9 @@ class Runes:
     support = "https://cdn.discordapp.com/attachments/572836578267889664/1374505207962275962/image.png?ex=682e4b3a&is=682cf9ba&hm=abfc01fd290a34396c87476e31360199df12fd08f509ca13568eb1e10a827960&"
 
 class TeemoImages:
-    DARKTEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:344/quality:100/uri:ifs%3A%2F%2FM%2Fb6da8381-0b9a-4718-b4fc-4ecd489313a4/watermark:F/width:512?csig=AAAAAAAAAAAAAAAAAAAAAGESG7dqcEKKPdKmlqi3ZAKNHP8Fc3q1g_EvY9AZfptc&exp=1747748452&osig=AAAAAAAAAAAAAAAAAAAAAKb1htselB_H26R0DCxO9L5KGe-LAiftQw89GlO21zvJ&signer=media-rpc&x-canva-quality=screen"
-    BEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:508/quality:100/uri:ifs%3A%2F%2FM%2Fab76173d-9ce8-4b96-939f-636b8fb6cf2f/watermark:F/width:508?csig=AAAAAAAAAAAAAAAAAAAAAAnjFyDpaUJ4zg6QovHosZx6kaPeLuCPdE63WN0Y43R0&exp=1747746917&osig=AAAAAAAAAAAAAAAAAAAAADWABYGKgg1mz9MiT4n-sjkW78LQQF6zxmcWCzTmU_34&signer=media-rpc&x-canva-quality=screen"
-    TEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:ifs%3A%2F%2FM%2Ff30b25fa-6d38-4280-8cd8-fad1550b3fc8/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAAMG6TOp_rvM55_NSYTF4P-S96h89k3aj4Uf5RGH9X3PX&exp=1747748929&osig=AAAAAAAAAAAAAAAAAAAAAHapcMun4lWKZtWAsWXoTriI3oqjktIQntOTEyZO7cvS&signer=media-rpc&x-canva-quality=screen"
+    DARKTEEMO = "https://cdn.discordapp.com/attachments/572836578267889664/1374512593447682069/width512.png?ex=682e521b&is=682d009b&hm=dfcc1fa6c5fea93db84dbb25f493b966735e726b0f369a1e47279f2983635fd0&"
+    BEEMO = "https://cdn.discordapp.com/attachments/572836578267889664/1374512508798242855/width508.png?ex=682e5207&is=682d0087&hm=eec4cc5551424f0948ad25cf7779e60d507ef15ce96342c7b836cc59d24b4d7f&"
+    TEEMO = "https://cdn.discordapp.com/attachments/572836578267889664/1374512685223514235/width800.png?ex=682e5231&is=682d00b1&hm=40facf50cfc539c2658c79c12e957b19487ef0289647151f5fb901895488c4f4&"
     TEEMO_MUSHROOM = "https://static.wikia.nocookie.net/leagueoflegends/images/0/0c/Teemo_Mushroom_Trap_Render.png/revision/latest?cb=20240926204910"
     
 class Rank(IntEnum):
@@ -259,9 +259,12 @@ def embed_top_shrooms(top_shrooms):
         color=color_hex
     )
     embed.set_thumbnail(url=TeemoImages.TEEMO_MUSHROOM)
-    
-    for i, user in enumerate(top_shrooms):
-        embed.add_field(name=f"#{i+1} {user['username']}", value=f"Shrooms: {user['shrooms']}", inline=False)
+    if top_shrooms.get("status") == "success" and isinstance(top_shrooms.get("data"), list):
+        for i, user in enumerate(top_shrooms["data"]):
+            embed.add_field(name=f"#{i+1} {user['username']}", value=f"Shrooms: {user['shrooms']}", inline=False)
+    else:
+        embed.add_field(name="No data", value="No shrooms data found", inline=False)
+
     
     return embed
 
@@ -277,8 +280,12 @@ def embed_top_respects(top_respects):
     )
     embed.set_thumbnail(url=TeemoImages.TEEMO)
     
-    for i, user in enumerate(top_respects):
-        embed.add_field(name=f"#{i+1} {user['username']}", value=f"Respects: {user['respects']}", inline=False)
+    if top_respects.get("status") == "success" and isinstance(top_respects.get("data"), list):
+        for i, user in enumerate(top_respects["data"]):
+            embed.add_field(name=f"#{i+1} {user['username']}", value=f"Respects: {user['respects']}", inline=False)
+    else:
+        embed.add_field(name="No data", value="No respects data found", inline=False)
+
     
     return embed
 

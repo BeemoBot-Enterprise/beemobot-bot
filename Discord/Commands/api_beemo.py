@@ -49,6 +49,7 @@ def get_top_respects():
     try:
         response = requests.get(url)
         response.raise_for_status()
+        print(response.json())
         return response.json()
     except requests.RequestException as e:
         print(f"Erreur get_top_respects : {e}")

@@ -44,7 +44,6 @@ def setup_global_commands(bot):
         icon_link = get_icon_by_iconId(get_user_icon_id_by_user_id_and_region(user_id, region), lol_watcher, DEFAULT_REGION)
         give_respect(name+'_'+tag)
         user_stats = get_user_stats(name+'_'+tag)
-        print(user_stats)
         embed = embed_respect(name, tag, region, icon_link, user_stats['data']['shrooms'], user_stats['data']['respects'])
         await interation.response.send_message(embed=embed)
         
