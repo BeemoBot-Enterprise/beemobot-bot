@@ -5,6 +5,12 @@ from PIL import Image
 from io import BytesIO
 from collections import Counter
 
+class TeemoImages:
+    DARKTEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:344/quality:100/uri:ifs%3A%2F%2FM%2Fb6da8381-0b9a-4718-b4fc-4ecd489313a4/watermark:F/width:512?csig=AAAAAAAAAAAAAAAAAAAAAGESG7dqcEKKPdKmlqi3ZAKNHP8Fc3q1g_EvY9AZfptc&exp=1747748452&osig=AAAAAAAAAAAAAAAAAAAAAKb1htselB_H26R0DCxO9L5KGe-LAiftQw89GlO21zvJ&signer=media-rpc&x-canva-quality=screen"
+    BEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:508/quality:100/uri:ifs%3A%2F%2FM%2Fab76173d-9ce8-4b96-939f-636b8fb6cf2f/watermark:F/width:508?csig=AAAAAAAAAAAAAAAAAAAAAAnjFyDpaUJ4zg6QovHosZx6kaPeLuCPdE63WN0Y43R0&exp=1747746917&osig=AAAAAAAAAAAAAAAAAAAAADWABYGKgg1mz9MiT4n-sjkW78LQQF6zxmcWCzTmU_34&signer=media-rpc&x-canva-quality=screen"
+    TEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:ifs%3A%2F%2FM%2Ff30b25fa-6d38-4280-8cd8-fad1550b3fc8/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAAMG6TOp_rvM55_NSYTF4P-S96h89k3aj4Uf5RGH9X3PX&exp=1747748929&osig=AAAAAAAAAAAAAAAAAAAAAHapcMun4lWKZtWAsWXoTriI3oqjktIQntOTEyZO7cvS&signer=media-rpc&x-canva-quality=screen"
+    TEEMO_MUSHROOM = "https://static.wikia.nocookie.net/leagueoflegends/images/0/0c/Teemo_Mushroom_Trap_Render.png/revision/latest?cb=20240926204910"
+    
 class Rank(IntEnum):
     UNRANKED = -1
     IRON = 0
@@ -117,24 +123,106 @@ def embed_user_info(infos, Name, icon_link):
         title=f"{Name}' Infos",
         description=f"Here the infos we gathered on {Name}",
         color=color_hex
-    )
+        )
     embed.set_author(
         name="BeemoBot",
         url="https://github.com/BeemoBot-Enterprise",
         icon_url="https://avatars.githubusercontent.com/u/189348916?s=200&v=4"
-    )
+        )
     embed.set_thumbnail(url=icon_link)
     embed.add_field(name="SoloQ", value=f"{SoloQ_Rank} {SoloQ_LP} LP | {SoloQ_WR:.2%}")
     embed.add_field(name="FlexQ", value=f"{FlexQ_Rank} {FlexQ_LP} LP | {FlexQ_WR:.2%}")
     embed.set_footer(text="provided by BeemoBot")
     embed.set_image(url=Highest_Rank_Image)
     return embed
+
+#SHROOM
+def embed_shroom(name, tag, region, icon_link, shrooms, respects):    
+    # Obtenir la couleur dominante de l'image
+    dominant_color = get_dominant_color(icon_link)
+    color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
     
-# NAME
-# ICON
-# COLOR
-# SOLOQ
-# FLEXQ
-# HIGHEST MASTERIES
-# WINRATE
-# HIHGHEST RANK IMAGE
+    embed=discord.Embed(
+        title="Teemo is SHROOMING",
+        description="You just Shroomed this guy",
+        color=color_hex
+        )
+    embed.set_author(
+        name="BeemoBot",
+        url="https://github.com/BeemoBot-Enterprise",
+        icon_url="https://avatars.githubusercontent.com/u/189348916?s=200&v=4"
+        )
+    embed.add_field(
+        name="User", 
+        value=f"```{name}#{tag}```",
+        inline=True
+        )
+    embed.add_field(
+        name="Region",
+        value=f"```{region}```",
+        inline=True
+        )
+    embed.add_field(
+        name="",
+        value="─────────────────────────",
+        inline=False
+        )
+    embed.add_field(
+        name="Shrooms", 
+        value=f"```{shrooms}```",
+        inline=True
+        )
+    embed.add_field(
+        name="Respects", 
+        value=f"```{respects}```",
+        inline=True
+        )
+    embed.set_thumbnail(url=icon_link)
+    embed.set_footer(text="provided by BeemoBot")
+    embed.set_image(url=TeemoImages.DARKTEEMO)
+    return embed
+
+def embed_respect(name, tag, region, icon_link, shrooms, respects):    
+    # Obtenir la couleur dominante de l'image
+    dominant_color = get_dominant_color(icon_link)
+    color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
+    
+    embed=discord.Embed(
+        title="Teemo is RESPECTING",
+        description="You Respect this guy",
+        color=color_hex
+        )
+    embed.set_author(
+        name="BeemoBot",
+        url="https://github.com/BeemoBot-Enterprise",
+        icon_url="https://avatars.githubusercontent.com/u/189348916?s=200&v=4"
+        )
+    embed.add_field(
+        name="User", 
+        value=f"```{name}#{tag}```",
+        inline=True
+        )
+    embed.add_field(
+        name="Region",
+        value=f"```{region}```",
+        inline=True
+        )
+    embed.add_field(
+        name="",
+        value="─────────────────────────",
+        inline=False
+        )
+    embed.add_field(
+        name="Shrooms", 
+        value=f"```{shrooms}```",
+        inline=True
+        )
+    embed.add_field(
+        name="Respects", 
+        value=f"```{respects}```",
+        inline=True
+        )
+    embed.set_thumbnail(url=icon_link)
+    embed.set_footer(text="provided by BeemoBot")
+    embed.set_image(url=TeemoImages.BEEMO)
+    return embed
