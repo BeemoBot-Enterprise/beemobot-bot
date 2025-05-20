@@ -5,7 +5,7 @@ from Discord.Embeds_Factory.global_commands_embeds import *
 from Riot.riot_watcher import *
 from Discord.Commands.embed_factory import *
 import typing
-
+from Discord.Commands.api_beemo import *
 
 # NE PAS TOUCHER SVP
 def setup_global_commands(bot):
@@ -40,7 +40,15 @@ def setup_global_commands(bot):
         region = region_real_name(region)
         user_id = get_user_id_by_name_tag_and_region(name, tag, region)
         icon_link = get_icon_by_iconId(get_user_icon_id_by_user_id_and_region(user_id, region), lol_watcher, DEFAULT_REGION)
-        embed = embed_respect(name, tag, region, icon_link, shrooms=2, respects=4)
+        give_respect(name+'_'+tag)
+        user_stats = get_user_stats(name+'_'+tag)
+        print(user_stats)
+        embed = embed_respect(name, tag, region, icon_link, user_stats['data']['shrooms'], user_stats['data']['respects'])
         await interation.response.send_message(embed=embed)
         
-        
+    #Display a simple maessage
+    @bot.tree.command(name="help_orion",
+                description="A message from Orion")
+    async def self(interation: discord.Interaction):
+        embed = embed_help_orion()
+        await interation.response.send_message(embed=embed)
