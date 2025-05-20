@@ -5,6 +5,13 @@ from PIL import Image
 from io import BytesIO
 from collections import Counter
 
+class Runes:
+    top = "https://cdn.discordapp.com/attachments/572836578267889664/1374504793740939294/image.png?ex=682e4ad7&is=682cf957&hm=46d612ad066a1a22120e4fc1fbabbedd450e9368dcc9122f4ae83be914a2b302&"
+    jungle = "https://cdn.discordapp.com/attachments/572836578267889664/1374504928281886871/image.png?ex=682e4af7&is=682cf977&hm=a4ff389b5c092c279d791583b08320827b2ee125d849ebdda7724433119dd842&"
+    mid = "https://cdn.discordapp.com/attachments/572836578267889664/1374505043130060952/image.png?ex=682e4b13&is=682cf993&hm=ea80a3ec65251c00bb4bab0ee5ce2eac3cde59cb01ec8154cc89b12f73333ab4&"
+    bot = "https://cdn.discordapp.com/attachments/572836578267889664/1374505119017861241/image.png?ex=682e4b25&is=682cf9a5&hm=518bb18a3c114df857595104556bd606d55fb10b4a2c677e6a5a51dc733275d7&"
+    support = "https://cdn.discordapp.com/attachments/572836578267889664/1374505207962275962/image.png?ex=682e4b3a&is=682cf9ba&hm=abfc01fd290a34396c87476e31360199df12fd08f509ca13568eb1e10a827960&"
+
 class TeemoImages:
     DARKTEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:344/quality:100/uri:ifs%3A%2F%2FM%2Fb6da8381-0b9a-4718-b4fc-4ecd489313a4/watermark:F/width:512?csig=AAAAAAAAAAAAAAAAAAAAAGESG7dqcEKKPdKmlqi3ZAKNHP8Fc3q1g_EvY9AZfptc&exp=1747748452&osig=AAAAAAAAAAAAAAAAAAAAAKb1htselB_H26R0DCxO9L5KGe-LAiftQw89GlO21zvJ&signer=media-rpc&x-canva-quality=screen"
     BEEMO = "https://media.canva.com/v2/image-resize/format:PNG/height:508/quality:100/uri:ifs%3A%2F%2FM%2Fab76173d-9ce8-4b96-939f-636b8fb6cf2f/watermark:F/width:508?csig=AAAAAAAAAAAAAAAAAAAAAAnjFyDpaUJ4zg6QovHosZx6kaPeLuCPdE63WN0Y43R0&exp=1747746917&osig=AAAAAAAAAAAAAAAAAAAAADWABYGKgg1mz9MiT4n-sjkW78LQQF6zxmcWCzTmU_34&signer=media-rpc&x-canva-quality=screen"
@@ -226,6 +233,7 @@ def embed_respect(name, tag, region, icon_link, shrooms, respects):
     embed.set_footer(text="provided by BeemoBot")
     embed.set_image(url=TeemoImages.BEEMO)
     return embed
+
 def embed_help_orion():
     Icon = "https://cdn.discordapp.com/attachments/1301209240379199591/1374372873950466179/Minimalistic-vector-hd-rocket-clipart-simple-hd-fly-into-the_194958_wh860.png?ex=682dcffb&is=682c7e7b&hm=ac776562e6e341024b93b62b1c12811408d437df4fc255660c29c228192c680f&"
     # Obtenir la couleur dominante de l'image
@@ -238,4 +246,83 @@ def embed_help_orion():
         color=color_hex
     )
     embed.set_thumbnail(url=Icon)
+    return embed
+
+def embed_top_shrooms(top_shrooms):
+    # Obtenir la couleur dominante de l'image
+    dominant_color = get_dominant_color(TeemoImages.TEEMO_MUSHROOM)
+    color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
+    
+    embed = discord.Embed(
+        title="Top 10 Shrooms",
+        description="Here is the top 10 shrooms",
+        color=color_hex
+    )
+    embed.set_thumbnail(url=TeemoImages.TEEMO_MUSHROOM)
+    
+    for i, user in enumerate(top_shrooms):
+        embed.add_field(name=f"#{i+1} {user['username']}", value=f"Shrooms: {user['shrooms']}", inline=False)
+    
+    return embed
+
+def embed_top_respects(top_respects):
+    # Obtenir la couleur dominante de l'image
+    dominant_color = get_dominant_color(TeemoImages.TEEMO)
+    color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
+    
+    embed = discord.Embed(
+        title="Top 10 Respects",
+        description="Here is the top 10 respects",
+        color=color_hex
+    )
+    embed.set_thumbnail(url=TeemoImages.TEEMO)
+    
+    for i, user in enumerate(top_respects):
+        embed.add_field(name=f"#{i+1} {user['username']}", value=f"Respects: {user['respects']}", inline=False)
+    
+    return embed
+
+def embed_runes(role):
+    
+    embed = discord.Embed(
+        title="Best Runes for Teemo",
+        description=f"Here is the best runes for {role}",
+        color=0x00ff00  # Couleur par défaut, peut être modifiée selon la couleur dominante
+    )
+    
+    embed.set_thumbnail(url=TeemoImages.TEEMO)
+    # Ajouter les runes spécifiques au rôle
+    if role == "top":
+        embed.set_image(url=Runes.top)
+        embed.add_field(name="Top Runes", value="Rune details for Top role", inline=False)
+        # Obtenir la couleur dominante de l'image
+        dominant_color = get_dominant_color(Runes.top)
+        color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
+    elif role == "mid":
+        embed.set_image(url=Runes.mid)
+        embed.add_field(name="Mid Runes", value="Rune details for Mid role", inline=False)
+        # Obtenir la couleur dominante de l'image
+        dominant_color = get_dominant_color(Runes.mid)
+        color_hex = int('%02x%02x%02x' % dominant_color, 16)
+    elif role == "bot":
+        embed.set_image(url=Runes.bot)
+        embed.add_field(name="Bot Runes", value="Rune details for Bot role", inline=False)
+        # Obtenir la couleur dominante de l'image
+        dominant_color = get_dominant_color(Runes.bot)
+        color_hex = int('%02x%02x%02x' % dominant_color, 16)
+    elif role == "jungle":
+        embed.set_image(url=Runes.jungle)
+        embed.add_field(name="Jungle Runes", value="Rune details for Jungle role", inline=False)
+        # Obtenir la couleur dominante de l'image
+        dominant_color = get_dominant_color(Runes.jungle)
+        color_hex = int('%02x%02x%02x' % dominant_color, 16)
+    elif role == "support":
+        embed.set_image(url=Runes.support)
+        embed.add_field(name="Support Runes", value="Rune details for Support role", inline=False)
+        # Obtenir la couleur dominante de l'image
+        dominant_color = get_dominant_color(Runes.support)
+        color_hex = int('%02x%02x%02x' % dominant_color, 16)
+    
+    embed.color = color_hex  # Mettre à jour la couleur de l'embed avec la couleur dominante
+    embed.set_footer(text="provided by BeemoBot")
     return embed

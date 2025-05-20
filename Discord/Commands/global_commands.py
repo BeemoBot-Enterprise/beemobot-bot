@@ -29,7 +29,9 @@ def setup_global_commands(bot):
         region = region_real_name(region)
         user_id = get_user_id_by_name_tag_and_region(name, tag, region)
         icon_link = get_icon_by_iconId(get_user_icon_id_by_user_id_and_region(user_id, region), lol_watcher, DEFAULT_REGION)
-        embed = embed_shroom(name, tag, region, icon_link, shrooms=2, respects=4)
+        give_shroom(name+'_'+tag)
+        user_stats = get_user_stats(name+'_'+tag)
+        embed = embed_shroom(name, tag, region, icon_link, user_stats['data']['shrooms'], user_stats['data']['respects'])
         await interation.response.send_message(embed=embed)
     
     #Add a "respect" to someone with their name and tag /respect
@@ -52,3 +54,27 @@ def setup_global_commands(bot):
     async def self(interation: discord.Interaction):
         embed = embed_help_orion()
         await interation.response.send_message(embed=embed)
+    
+    #Display the top 10 shrooms
+    @bot.tree.command(name="top_shrooms",
+                description="Display the top 10 shrooms")
+    async def self(interation: discord.Interaction):
+        top_shrooms = get_top_shrooms()
+        embed = embed_top_shrooms(top_shrooms)
+        await interation.response.send_message(embed=embed, ephemeral=True)
+        
+    #Display the top 10 respects
+    @bot.tree.command(name="top_respects",
+                description="Display the top 10 respects")
+    async def self(interation: discord.Interaction):
+        top_respects = get_top_respects()
+        embed = embed_top_respects(top_respects)
+        await interation.response.send_message(embed=embed, ephemeral=True)
+    
+    #Display the current best teemo runes for the asked role (top, mid, bot, jungle, support)
+    @bot.tree.command(name="runes",
+                description="Display the best runes for teemo")
+    @app_commands.describe(role="The role you want to see the runes for")
+    async def self(interation: discord.Interaction, role: typing.Literal["top","mid","bot","jungle","support"]):
+        embed = embed_runes(role)
+        await interation.response.send_message(embed=embed, ephemeral=True)
