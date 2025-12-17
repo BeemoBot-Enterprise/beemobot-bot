@@ -1,4 +1,4 @@
-# Beemo Bot 🤖
+# Beemo Bot
 
 TEMP
 
