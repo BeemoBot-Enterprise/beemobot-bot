@@ -4,13 +4,15 @@ import requests
 from PIL import Image
 from io import BytesIO
 from collections import Counter
+from Riot.riot_watcher import lol_watcher
+from Riot.riot_toolbox import get_item_name_by_id
 
 class Runes:
-    top = "https://cdn.discordapp.com/attachments/572836578267889664/1374504793740939294/image.png?ex=682e4ad7&is=682cf957&hm=46d612ad066a1a22120e4fc1fbabbedd450e9368dcc9122f4ae83be914a2b302&"
-    jungle = "https://cdn.discordapp.com/attachments/572836578267889664/1374504928281886871/image.png?ex=682e4af7&is=682cf977&hm=a4ff389b5c092c279d791583b08320827b2ee125d849ebdda7724433119dd842&"
-    mid = "https://cdn.discordapp.com/attachments/572836578267889664/1374505043130060952/image.png?ex=682e4b13&is=682cf993&hm=ea80a3ec65251c00bb4bab0ee5ce2eac3cde59cb01ec8154cc89b12f73333ab4&"
-    bot = "https://cdn.discordapp.com/attachments/572836578267889664/1374505119017861241/image.png?ex=682e4b25&is=682cf9a5&hm=518bb18a3c114df857595104556bd606d55fb10b4a2c677e6a5a51dc733275d7&"
-    support = "https://cdn.discordapp.com/attachments/572836578267889664/1374505207962275962/image.png?ex=682e4b3a&is=682cf9ba&hm=abfc01fd290a34396c87476e31360199df12fd08f509ca13568eb1e10a827960&"
+    top = "attachment://image_top.png"
+    jungle = "attachment://image_jungle.png"
+    mid = "attachment://image_mid.png"
+    bot = "attachment://image_bot.png"
+    support = "attachment://image_supp.png"
 
 class TeemoImages:
     DARKTEEMO = "https://cdn.discordapp.com/attachments/572836578267889664/1374512593447682069/width512.png?ex=682e521b&is=682d009b&hm=dfcc1fa6c5fea93db84dbb25f493b966735e726b0f369a1e47279f2983635fd0&"
@@ -67,33 +69,32 @@ def get_highest_rank_image(SoloQ, FlexQ):
         return 'https://static.wikia.nocookie.net/leagueoflegends/images/1/13/Season_2023_-_Unranked.png/revision/latest?cb=20231007211937'   
 
 def get_dominant_color(image_url):
-    # Télécharger l'image depuis l'URL
     print("get_dominant_color")
     print(image_url)
     response = requests.get(image_url)
     if response.status_code != 200:
         raise Exception(f"Impossible de télécharger l'image depuis {image_url}")
     
-    # Charger l'image dans PIL
     image = Image.open(BytesIO(response.content))
-    
-    # Redimensionner l'image pour réduire la complexité (optionnel)
-    image = image.resize((50, 50))  # Réduire la taille pour accélérer le traitement
-    
-    # Convertir l'image en mode RGB
+    image = image.resize((50, 50))
     image = image.convert('RGB')
-    
-    # Obtenir les couleurs de chaque pixel
     pixels = list(image.getdata())
-    
-    # Compter les couleurs les plus fréquentes
-    most_common_color = Counter(pixels).most_common(1)[0][0]  # (R, G, B)
-    
-    # Retourner la couleur dominante
+    most_common_color = Counter(pixels).most_common(1)[0][0]
+    return most_common_color
+
+def get_dominant_color_from_file(file_path):
+    print(f"get_dominant_color_from_file: {file_path}")
+    image = Image.open(file_path)
+    image = image.resize((50, 50))
+    image = image.convert('RGB')
+    pixels = list(image.getdata())
+    most_common_color = Counter(pixels).most_common(1)[0][0]
     return most_common_color
 
 # Exemple d'utilisation dans embed_user_info
 def embed_user_info(infos, Name, icon_link, summoner_level=0):
+    print("INFO INFO INFO INFO")
+    print(infos)
     if len(infos) > 0:
         SoloQ = infos[0]
         SoloQ_TIER = SoloQ["tier"]
@@ -294,42 +295,74 @@ def embed_runes(role):
     embed = discord.Embed(
         title="Best Runes for Teemo",
         description=f"Here is the best runes for {role}",
-        color=0x00ff00  # Couleur par défaut, peut être modifiée selon la couleur dominante
+        color=0x00ff00
     )
     
     embed.set_thumbnail(url=TeemoImages.TEEMO)
-    # Ajouter les runes spécifiques au rôle
-    if role == "top":
-        embed.set_image(url=Runes.top)
-        embed.add_field(name="Top Runes", value="Rune details for Top role", inline=False)
-        # Obtenir la couleur dominante de l'image
-        dominant_color = get_dominant_color(Runes.top)
-        color_hex = int('%02x%02x%02x' % dominant_color, 16)  # Convertir RGB en hexadécimal
-    elif role == "mid":
-        embed.set_image(url=Runes.mid)
-        embed.add_field(name="Mid Runes", value="Rune details for Mid role", inline=False)
-        # Obtenir la couleur dominante de l'image
-        dominant_color = get_dominant_color(Runes.mid)
-        color_hex = int('%02x%02x%02x' % dominant_color, 16)
-    elif role == "bot":
-        embed.set_image(url=Runes.bot)
-        embed.add_field(name="Bot Runes", value="Rune details for Bot role", inline=False)
-        # Obtenir la couleur dominante de l'image
-        dominant_color = get_dominant_color(Runes.bot)
-        color_hex = int('%02x%02x%02x' % dominant_color, 16)
-    elif role == "jungle":
-        embed.set_image(url=Runes.jungle)
-        embed.add_field(name="Jungle Runes", value="Rune details for Jungle role", inline=False)
-        # Obtenir la couleur dominante de l'image
-        dominant_color = get_dominant_color(Runes.jungle)
-        color_hex = int('%02x%02x%02x' % dominant_color, 16)
-    elif role == "support":
-        embed.set_image(url=Runes.support)
-        embed.add_field(name="Support Runes", value="Rune details for Support role", inline=False)
-        # Obtenir la couleur dominante de l'image
-        dominant_color = get_dominant_color(Runes.support)
-        color_hex = int('%02x%02x%02x' % dominant_color, 16)
     
-    embed.color = color_hex  # Mettre à jour la couleur de l'embed avec la couleur dominante
+    rune_file_map = {
+        "top": "image_top.png",
+        "mid": "image_mid.png",
+        "bot": "image_bot.png",
+        "jungle": "image_jungle.png",
+        "support": "image_supp.png"
+    }
+    
+    if role in rune_file_map:
+        file_name = rune_file_map[role]
+        embed.set_image(url=f"attachment://{file_name}")
+        # embed.add_field(name=f"{role.capitalize()} Runes", value=f"Rune details for {role.capitalize()} role", inline=False)
+        
+        file_path = f"Runes/{file_name}"
+        try:
+            dominant_color = get_dominant_color_from_file(file_path)
+            color_hex = int('%02x%02x%02x' % dominant_color, 16)
+            embed.color = color_hex
+        except Exception as e:
+            print(f"Error getting dominant color: {e}")
+    
+    embed.set_footer(text="provided by BeemoBot")
+    return embed, rune_file_map.get(role)
+
+def embed_last_game(match_data, name, region):
+    if not match_data:
+        embed = discord.Embed(
+            title="No Recent Games",
+            description=f"No recent games found for {name}",
+            color=0xff0000
+        )
+        return embed
+    
+    kda = f"{match_data['kills']}/{match_data['deaths']}/{match_data['assists']}"
+    kda_ratio = (match_data['kills'] + match_data['assists']) / max(match_data['deaths'], 1)
+    
+    win_color = 0x00ff00 if match_data['win'] else 0xff0000
+    win_text = "Victory" if match_data['win'] else "Defeat"
+    
+    duration_min = match_data['gameDuration'] // 60
+    duration_sec = match_data['gameDuration'] % 60
+    
+    embed = discord.Embed(
+        title=f"{name}'s Last Game - {win_text}",
+        description=f"Champion: **{match_data['champion']}**\nKDA: **{kda}** ({kda_ratio:.2f})\nDuration: {duration_min}:{duration_sec:02d}",
+        color=win_color
+    )
+    
+    items_str = ""
+    for item_id in match_data['items']:
+        if item_id != 0:
+            item_name = get_item_name_by_id(item_id, lol_watcher, 'euw1')
+            if item_name:
+                items_str += f"{item_name}, "
+    if items_str:
+        items_str = items_str[:-2]
+        embed.add_field(name="Items", value=items_str, inline=False)
+    
+    embed.set_author(
+        name="BeemoBot",
+        url="https://github.com/BeemoBot-Enterprise",
+        icon_url="https://avatars.githubusercontent.com/u/189348916?s=200&v=4"
+    )
+    
     embed.set_footer(text="provided by BeemoBot")
     return embed
