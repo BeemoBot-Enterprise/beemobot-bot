@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 import requests
 
 BASE_URL = "https://api.beemobot.fr/game"

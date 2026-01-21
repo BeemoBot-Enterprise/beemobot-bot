@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 import os
 from dotenv import load_dotenv
 from colorama import Fore, Back, Style

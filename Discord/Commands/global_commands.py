@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 import discord
 from discord import app_commands
 from Logs.logs import command_used

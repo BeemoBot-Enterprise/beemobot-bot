@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 import os
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 from colorama import Fore, Back, Style

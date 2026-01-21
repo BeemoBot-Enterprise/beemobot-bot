@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 import discord
 from discord.ext import commands
 from Discord.Commands.global_commands import setup_global_commands  # Import commands from the commands folder

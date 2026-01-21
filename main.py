@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 from Verification.verification import security_check
 from Discord.bot import bot  # Import bot instance
 import os
