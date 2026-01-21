@@ -1,3 +1,4 @@
+# Last updated: 2026-01-21
 # Return the current game version
 def get_game_version(lol_watcher, DEFAULT_REGION):
     return lol_watcher.data_dragon.versions_for_region(DEFAULT_REGION)["n"]
