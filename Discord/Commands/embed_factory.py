@@ -93,7 +93,7 @@ def get_dominant_color(image_url):
     return most_common_color
 
 # Exemple d'utilisation dans embed_user_info
-def embed_user_info(infos, Name, icon_link):
+def embed_user_info(infos, Name, icon_link, summoner_level=0):
     if len(infos) > 0:
         SoloQ = infos[0]
         SoloQ_TIER = SoloQ["tier"]
@@ -128,7 +128,7 @@ def embed_user_info(infos, Name, icon_link):
     # Créer l'embed
     embed = discord.Embed(
         title=f"{Name}' Infos",
-        description=f"Here the infos we gathered on {Name}",
+        description=f"Here the infos we gathered on {Name} (Level {summoner_level})",
         color=color_hex
         )
     embed.set_author(
