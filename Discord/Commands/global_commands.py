@@ -18,6 +18,8 @@ def setup_global_commands(bot):
         
         region=region_real_name(region)
         user_data = get_user_full_data(name, tag, region)
+        print("USER DATA USER DATA USER DATA")
+        print(user_data)
         embed = embed_user_info(user_data['rank'], name, user_data['icon_url'], user_data['summoner_level'])
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
@@ -75,5 +77,19 @@ def setup_global_commands(bot):
                 description="Display the best runes for teemo")
     @app_commands.describe(role="The role you want to see the runes for")
     async def self(interaction: discord.Interaction, role: typing.Literal["top","mid","bot","jungle","support"]):
-        embed = embed_runes(role)
+        embed, file_name = embed_runes(role)
+        if file_name:
+            file_path = f"Runes/{file_name}"
+            file = discord.File(file_path, filename=file_name)
+            await interaction.response.send_message(embed=embed, file=file, ephemeral=True)
+        else:
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    @bot.tree.command(name="lastgame",
+                description="Display the last game of a summoner")
+    @app_commands.describe(name="The summoner name", tag="The tag of the user", region="The server region")
+    async def self(interaction: discord.Interaction, name:str, tag:str, region: typing.Literal["EUW","EUNE","NA","BR","JP","KR","LA","LAS","OC","TR","RU"]):
+        region = region_real_name(region)
+        match_data = get_last_match_data(name, tag, region)
+        embed = embed_last_game(match_data, name, region)
         await interaction.response.send_message(embed=embed, ephemeral=True)
