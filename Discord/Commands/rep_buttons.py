@@ -33,8 +33,10 @@ class MatchRepView(discord.ui.View):
             }
             result = await give_rep(payload)
             if result:
+                gain = 10 if kind == "respect" else 5
                 await interaction.followup.send(
-                    f"✅ {kind.title()} envoyé sur {participant['championName']}",
+                    f"✅ {kind.title()} envoyé sur {participant['championName']} (weight {result['weight']})\n"
+                    f"🍯 +{gain} honey crédité sur leur compte",
                     ephemeral=True,
                 )
                 button.disabled = True
