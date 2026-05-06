@@ -27,3 +27,5 @@ bot = MyBot()
 @bot.event
 async def on_ready():
     print(Back.YELLOW + f"Bot is ready as {bot.user}" + Style.RESET_ALL)
+    from worker.dm_dispatcher import dispatch_loop
+    bot.loop.create_task(dispatch_loop(bot))
