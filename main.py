@@ -1,18 +1,19 @@
-# Last updated: 2026-01-21
-from Verification.verification import security_check
-from Discord.bot import bot  # Import bot instance
+# Last updated: 2026-05-06
+"""Bot entry point. Defaults to BOT_TOKEN_TEST in dev, BOT_TOKEN_PROD when ENV=production."""
 import os
+import logging
+from Verification.verification import security_check
+from Discord.bot import bot
+from config import BOT_TOKEN_PROD, BOT_TOKEN_TEST
 
-bot_token = os.getenv("BOT_TOKEN_PROD")  # Get the bot token from the environment variables
-bot_token_test = os.getenv("BOT_TOKEN_TEST") # Get the development bot token from the environment variables
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
 
-def Launch():
-    # Always verify security before launching the app
+
+def launch():
     security_check()
-    
-    # Run the bot
-    
-    bot.run(bot_token_test)
+    token = BOT_TOKEN_PROD if os.getenv("ENV") == "production" else BOT_TOKEN_TEST
+    bot.run(token)
+
 
 if __name__ == "__main__":
-    Launch()
+    launch()
