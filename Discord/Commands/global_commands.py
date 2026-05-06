@@ -16,6 +16,7 @@ from Discord.Commands.embed_factory import (
 )
 from Discord.Commands.link import register_link
 from Discord.Commands.me import register_me
+from Discord.Commands.judge import register_judge
 
 REGION_LITERAL = typing.Literal[
     "EUW", "EUNE", "NA", "BR", "JP", "KR", "LA", "LAS", "OC", "TR", "RU"
@@ -25,6 +26,7 @@ REGION_LITERAL = typing.Literal[
 def setup_global_commands(bot):
     register_link(bot)
     register_me(bot)
+    register_judge(bot)
 
     @bot.tree.command(name="help_orion", description="A message from Orion")
     async def help_orion_cmd(interaction: discord.Interaction):
