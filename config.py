@@ -10,6 +10,7 @@ BOT_TOKEN_PROD = os.getenv("BOT_TOKEN_PROD")
 BOT_TOKEN_TEST = os.getenv("BOT_TOKEN_TEST")
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 BEEMO_API_BASE_URL = os.getenv("BEEMO_API_BASE_URL", "https://api.beemobot.fr")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "http://localhost:3000")
 
 # --- Riot defaults ---
 DEFAULT_REGION = "euw1"
