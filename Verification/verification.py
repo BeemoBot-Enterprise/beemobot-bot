@@ -1,22 +1,22 @@
-# Last updated: 2026-01-21
-import os
-from dotenv import load_dotenv
-from colorama import Fore, Back, Style
+# Last updated: 2026-05-06
+import sys
+from colorama import Back, Style
+from config import BOT_TOKEN_TEST, RIOT_API_KEY
 from Logs.logs import verification_error, verification_success
 
-load_dotenv()
+REQUIRED_ENV = {
+    "BOT_TOKEN_TEST": BOT_TOKEN_TEST,
+    "RIOT_API_KEY": RIOT_API_KEY,
+}
 
-# Verification before launch of the app
+
 def security_check():
-    # Check if the environment is set correctly
-    verify_env()
-
-def verify_env():
-    if os.getenv("BOT_TOKEN_TEST") is None or os.getenv("RIOT_API_KEY") is None or os.getenv("BOT_TOKEN_TEST") == "" or os.getenv("RIOT_API_KEY") == "":
-        print(Back.RED + "Please make sure the BOT_TOKEN and RIOT_API_KEY environment variable are set properly." + Style.RESET_ALL)
-        verification_error("Environment variables are not set correctly")
-        exit(1)
-    else:
-        verification_success()
-        print(Back.GREEN + "BOT_TOKEN and RIOT_API_KEY are set correctly" + Style.RESET_ALL)
-        
+    """Verify required env is present before booting the bot."""
+    missing = [name for name, value in REQUIRED_ENV.items() if not value]
+    if missing:
+        msg = f"Missing required env variables: {', '.join(missing)}"
+        print(Back.RED + msg + Style.RESET_ALL)
+        verification_error(msg)
+        sys.exit(1)
+    verification_success()
+    print(Back.GREEN + "Environment variables are set correctly" + Style.RESET_ALL)
