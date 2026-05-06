@@ -5,50 +5,34 @@ import aiohttp
 from config import BEEMO_API_BASE_URL
 
 logger = logging.getLogger(__name__)
-
-GAME_URL = f"{BEEMO_API_BASE_URL}/game"
 DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 
-async def _post_json(path: str, payload: dict):
-    url = f"{GAME_URL}{path}"
+async def _request(method: str, path: str, json: dict | None = None):
+    url = f"{BEEMO_API_BASE_URL}{path}"
     try:
         async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
-            async with session.post(url, json=payload) as response:
-                response.raise_for_status()
-                return await response.json()
+            async with session.request(method, url, json=json) as resp:
+                if resp.status >= 400:
+                    body = await resp.text()
+                    logger.warning("%s %s -> %d: %s", method, url, resp.status, body)
+                    return None
+                return await resp.json()
     except aiohttp.ClientError as exc:
-        logger.error("POST %s failed: %s", url, exc)
+        logger.error("%s %s failed: %s", method, url, exc)
         return None
 
 
-async def _get_json(path: str):
-    url = f"{GAME_URL}{path}"
-    try:
-        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                return await response.json()
-    except aiohttp.ClientError as exc:
-        logger.error("GET %s failed: %s", url, exc)
-        return None
+async def get_profile(puuid: str):
+    return await _request("GET", f"/profile/{puuid}")
 
 
-async def give_shroom(username: str):
-    return await _post_json("/shroom", {"username": username})
+async def get_eligible(giver_puuid: str, receiver_puuid: str):
+    return await _request(
+        "GET",
+        f"/rep/eligible?giverPuuid={giver_puuid}&receiverPuuid={receiver_puuid}",
+    )
 
 
-async def give_respect(username: str):
-    return await _post_json("/respect", {"username": username})
-
-
-async def get_user_stats(username: str):
-    return await _get_json(f"/stats/{username}")
-
-
-async def get_top_shrooms():
-    return await _get_json("/top/shrooms")
-
-
-async def get_top_respects():
-    return await _get_json("/top/respects")
+async def give_rep(payload: dict):
+    return await _request("POST", "/rep/give", json=payload)
