@@ -1,11 +1,15 @@
-import discord
-from enum import *
-import requests
-from PIL import Image
+# Last updated: 2026-05-06
+import logging
+from enum import IntEnum
 from io import BytesIO
 from collections import Counter
+import discord
+import requests
+from PIL import Image
 from Riot.riot_watcher import lol_watcher
 from Riot.riot_toolbox import get_item_name_by_id
+
+logger = logging.getLogger(__name__)
 
 class Runes:
     top = "attachment://image_top.png"
@@ -34,7 +38,6 @@ class Rank(IntEnum):
     CHALLENGER = 9
 
 def get_highest_rank_image(SoloQ, FlexQ):
-    print("get_highest_rank_image")
     # Convertir les rangs en Enum pour comparaison
     soloq_rank = Rank[SoloQ.upper()]
     flexq_rank = Rank[FlexQ.upper()]
@@ -69,32 +72,20 @@ def get_highest_rank_image(SoloQ, FlexQ):
         return 'https://static.wikia.nocookie.net/leagueoflegends/images/1/13/Season_2023_-_Unranked.png/revision/latest?cb=20231007211937'   
 
 def get_dominant_color(image_url):
-    print("get_dominant_color")
-    print(image_url)
-    response = requests.get(image_url)
+    response = requests.get(image_url, timeout=10)
     if response.status_code != 200:
-        raise Exception(f"Impossible de télécharger l'image depuis {image_url}")
-    
-    image = Image.open(BytesIO(response.content))
-    image = image.resize((50, 50))
-    image = image.convert('RGB')
-    pixels = list(image.getdata())
-    most_common_color = Counter(pixels).most_common(1)[0][0]
-    return most_common_color
+        raise RuntimeError(f"Impossible de télécharger l'image depuis {image_url}")
+
+    image = Image.open(BytesIO(response.content)).resize((50, 50)).convert('RGB')
+    return Counter(list(image.getdata())).most_common(1)[0][0]
+
 
 def get_dominant_color_from_file(file_path):
-    print(f"get_dominant_color_from_file: {file_path}")
-    image = Image.open(file_path)
-    image = image.resize((50, 50))
-    image = image.convert('RGB')
-    pixels = list(image.getdata())
-    most_common_color = Counter(pixels).most_common(1)[0][0]
-    return most_common_color
+    image = Image.open(file_path).resize((50, 50)).convert('RGB')
+    return Counter(list(image.getdata())).most_common(1)[0][0]
 
-# Exemple d'utilisation dans embed_user_info
+
 def embed_user_info(infos, Name, icon_link, summoner_level=0):
-    print("INFO INFO INFO INFO")
-    print(infos)
     if len(infos) > 0:
         SoloQ = infos[0]
         SoloQ_TIER = SoloQ["tier"]
@@ -318,8 +309,8 @@ def embed_runes(role):
             dominant_color = get_dominant_color_from_file(file_path)
             color_hex = int('%02x%02x%02x' % dominant_color, 16)
             embed.color = color_hex
-        except Exception as e:
-            print(f"Error getting dominant color: {e}")
+        except (OSError, ValueError) as exc:
+            logger.warning("Failed to compute dominant color: %s", exc)
     
     embed.set_footer(text="provided by BeemoBot")
     return embed, rune_file_map.get(role)

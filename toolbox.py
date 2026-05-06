@@ -1,4 +1,4 @@
-# Last updated: 2026-01-21
+# Last updated: 2026-05-06
 def split_summoner_name_and_tag(summoner_name):
-    list = summoner_name.split("#")
-    return list
+    """Split 'Name#Tag' into ['Name', 'Tag']."""
+    return summoner_name.split("#")

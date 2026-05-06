@@ -1,57 +1,54 @@
-# Last updated: 2026-01-21
-import requests
+# Last updated: 2026-05-06
+"""Async client for the Beemo backend API. Uses aiohttp so it never blocks the bot's event loop."""
+import logging
+import aiohttp
+from config import BEEMO_API_BASE_URL
 
-BASE_URL = "https://api.beemobot.fr/game"
+logger = logging.getLogger(__name__)
 
-def give_shroom(username):
-    url = f"{BASE_URL}/shroom"
-    payload = {"username": username}
+GAME_URL = f"{BEEMO_API_BASE_URL}/game"
+DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=10)
+
+
+async def _post_json(path: str, payload: dict):
+    url = f"{GAME_URL}{path}"
     try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur give_shroom : {e}")
+        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
+            async with session.post(url, json=payload) as response:
+                response.raise_for_status()
+                return await response.json()
+    except aiohttp.ClientError as exc:
+        logger.error("POST %s failed: %s", url, exc)
         return None
 
-def give_respect(username):
-    url = f"{BASE_URL}/respect"
-    payload = {"username": username}
+
+async def _get_json(path: str):
+    url = f"{GAME_URL}{path}"
     try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur give_respect : {e}")
+        async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                return await response.json()
+    except aiohttp.ClientError as exc:
+        logger.error("GET %s failed: %s", url, exc)
         return None
 
-def get_user_stats(username):
-    url = f"{BASE_URL}/stats/{username}"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur get_user_stats : {e}")
-        return None
 
-def get_top_shrooms():
-    url = f"{BASE_URL}/top/shrooms"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur get_top_shrooms : {e}")
-        return None
+async def give_shroom(username: str):
+    return await _post_json("/shroom", {"username": username})
 
-def get_top_respects():
-    url = f"{BASE_URL}/top/respects"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        print(response.json())
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur get_top_respects : {e}")
-        return None
+
+async def give_respect(username: str):
+    return await _post_json("/respect", {"username": username})
+
+
+async def get_user_stats(username: str):
+    return await _get_json(f"/stats/{username}")
+
+
+async def get_top_shrooms():
+    return await _get_json("/top/shrooms")
+
+
+async def get_top_respects():
+    return await _get_json("/top/respects")
