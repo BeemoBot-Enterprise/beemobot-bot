@@ -1,13 +1,21 @@
-# Last updated: 2026-01-21
+# Last updated: 2026-05-07
 import logging
 from datetime import datetime
+from pathlib import Path
 
-# Configure the logger
-LOG_FILE = 'Logs/logs_holder/bot.log'
+# Resolve path relative to this file so it works no matter the CWD,
+# and create the directory if missing (e.g. fresh container).
+LOG_DIR = Path(__file__).parent / 'logs_holder'
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / 'bot.log'
 LOG_LEVEL = logging.INFO
 
+# Log to file (for local dev) AND stdout (so Coolify / docker logs see it).
 logging.basicConfig(
-    filename=LOG_FILE,
+    handlers=[
+        logging.FileHandler(str(LOG_FILE)),
+        logging.StreamHandler(),
+    ],
     level=LOG_LEVEL,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
