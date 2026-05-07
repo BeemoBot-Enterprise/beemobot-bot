@@ -1,15 +1,24 @@
-# Last updated: 2026-05-06
-"""Polls dm_queue and sends Discord DMs with rep buttons."""
+# Last updated: 2026-05-07
+"""Polls /worker/dm-queue/pending and sends Discord DMs with rep buttons.
+
+All DB access lives in the API now; this loop is pure HTTP, the bot is just
+a consumer that fetches work, sends DMs, and reports back the outcome.
+"""
 import asyncio
 import logging
 import os
-import psycopg2
 import discord
-from worker.riot_poller import DB_DSN
+from Discord.Commands.api_beemo import (
+    get_pending_dms,
+    mark_dm_sent,
+    mark_dm_failed,
+    mark_dm_forbidden,
+)
 from Discord.Commands.rep_buttons import MatchRepView
 
 logger = logging.getLogger(__name__)
 DM_INTERVAL_S = int(os.getenv("DM_INTERVAL_S", "30"))
+BATCH_LIMIT = int(os.getenv("DM_BATCH_LIMIT", "20"))
 
 
 async def dispatch_loop(bot: discord.Client):
@@ -23,54 +32,44 @@ async def dispatch_loop(bot: discord.Client):
 
 
 async def _process_batch(bot: discord.Client):
-    conn = psycopg2.connect(DB_DSN)
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT id, discord_id, match_id, participants "
-                "FROM dm_queue WHERE status = 'pending' AND attempts < 3 "
-                "ORDER BY created_at LIMIT 20"
-            )
-            rows = cur.fetchall()
+    payload = await get_pending_dms(limit=BATCH_LIMIT)
+    if not payload:
+        return
+    items = payload.get("items", [])
+    if not items:
+        return
 
-            for row_id, discord_id, match_id, participants in rows:
-                try:
-                    user = await bot.fetch_user(int(discord_id))
-                    embed = discord.Embed(
-                        title="🎮 Game terminée — qui mérite quoi ?",
-                        description=f"Match `{match_id}`",
-                        color=0x5865F2,
-                    )
-                    for p in participants[:10]:
-                        embed.add_field(
-                            name=p["championName"],
-                            value=f"K/D/A {p['kills']}/{p['deaths']}/{p['assists']} "
-                                  f"{'🏆 Win' if p['win'] else '💀 Loss'}",
-                            inline=False,
-                        )
-                    view = MatchRepView(
-                        giver_discord_id=discord_id,
-                        match_id=match_id,
-                        participants=participants,
-                        guild_id=None,
-                    )
-                    await user.send(embed=embed, view=view)
-                    cur.execute(
-                        "UPDATE dm_queue SET status='sent', sent_at=NOW() WHERE id=%s",
-                        (row_id,),
-                    )
-                except discord.Forbidden:
-                    cur.execute(
-                        "UPDATE dm_queue SET status='failed', last_error='dm_forbidden', attempts=attempts+1 WHERE id=%s",
-                        (row_id,),
-                    )
-                except Exception as exc:
-                    logger.exception("DM failed: %s", exc)
-                    cur.execute(
-                        "UPDATE dm_queue SET attempts=attempts+1, last_error=%s WHERE id=%s",
-                        (str(exc)[:200], row_id),
-                    )
-                conn.commit()
-                await asyncio.sleep(1.5)  # rate limit DMs
-    finally:
-        conn.close()
+    logger.info("dispatching %d pending DMs", len(items))
+    for item in items:
+        entry_id = item["id"]
+        discord_id = item["discordId"]
+        match_id = item["matchId"]
+        participants = item["participants"]
+        try:
+            user = await bot.fetch_user(int(discord_id))
+            embed = discord.Embed(
+                title="🎮 Game terminée — qui mérite quoi ?",
+                description=f"Match `{match_id}`",
+                color=0x5865F2,
+            )
+            for p in participants[:10]:
+                embed.add_field(
+                    name=p["championName"],
+                    value=f"K/D/A {p['kills']}/{p['deaths']}/{p['assists']} "
+                          f"{'🏆 Win' if p['win'] else '💀 Loss'}",
+                    inline=False,
+                )
+            view = MatchRepView(
+                giver_discord_id=discord_id,
+                match_id=match_id,
+                participants=participants,
+                guild_id=None,
+            )
+            await user.send(embed=embed, view=view)
+            await mark_dm_sent(entry_id)
+        except discord.Forbidden:
+            await mark_dm_forbidden(entry_id)
+        except Exception as exc:
+            logger.exception("DM failed for entry %s: %s", entry_id, exc)
+            await mark_dm_failed(entry_id, str(exc)[:200])
+        await asyncio.sleep(1.5)  # rate limit DMs
