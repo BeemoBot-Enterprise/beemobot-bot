@@ -19,6 +19,12 @@ async def _request(method: str, path: str, json: dict | None = None, internal: b
     try:
         async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
             async with session.request(method, url, json=json, headers=headers) as resp:
+                if resp.status == 404:
+                    # 404 may carry a structured error body — expose it to callers.
+                    try:
+                        return await resp.json()
+                    except Exception:
+                        return None
                 if resp.status >= 400:
                     body = await resp.text()
                     logger.warning("%s %s -> %d: %s", method, url, resp.status, body)
@@ -32,6 +38,10 @@ async def _request(method: str, path: str, json: dict | None = None, internal: b
 
 
 # ─── Public endpoints ─────────────────────────────────────────────────────────
+
+async def get_debrief(discord_id: str):
+    return await _request("GET", f"/lol/debrief/by-discord/{discord_id}")
+
 
 async def get_profile(puuid: str):
     return await _request("GET", f"/profile/{puuid}")

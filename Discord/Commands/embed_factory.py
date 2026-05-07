@@ -328,6 +328,41 @@ def embed_runes(role):
     embed.set_footer(text="provided by BeemoBot")
     return embed, rune_file_map.get(role)
 
+def embed_debrief(data: dict) -> discord.Embed:
+    """Embed for /debrief — recap of last match with heuristic verdicts."""
+    win = data.get("win", False)
+    color = 0x2ECC71 if win else 0xE74C3C
+    title = f"{'🏆' if win else '💀'} Debrief — {data.get('championName', 'Champion')}"
+
+    stats = data.get("stats", {})
+    verdicts = data.get("verdicts", [])
+
+    description = (
+        f"**Score** : `{data.get('score', 'B')}` · "
+        f"**Durée** : `{data.get('durationMin', 0)} min` · "
+        f"**Queue** : `{data.get('queueType', 'UNKNOWN')}`\n\n"
+        f"**KDA** `{stats.get('kda', 0)}` · "
+        f"**CS/min** `{stats.get('csPerMin', 0)}` · "
+        f"**Vision/min** `{stats.get('visionPerMin', 0)}`\n"
+        f"**Gold/min** `{stats.get('goldPerMin', 0)}` · "
+        f"**Dmg/Gold** `{stats.get('damageRatio', 0)}` · "
+        f"**KP** `{int(stats.get('killParticipation', 0) * 100)}%`"
+    )
+
+    embed = discord.Embed(title=title, description=description, color=color)
+
+    if verdicts:
+        verdict_text = "\n".join(f"{_severity_emoji(v['severity'])} {v['msg']}" for v in verdicts)
+        embed.add_field(name="🎯 Verdicts", value=verdict_text, inline=False)
+
+    embed.set_footer(text=f"Match {data.get('matchId', '?')}")
+    return embed
+
+
+def _severity_emoji(severity: str) -> str:
+    return {"red": "🔴", "yellow": "🟡", "green": "🟢"}.get(severity, "⚪")
+
+
 def embed_last_game(match_data, name, region):
     if not match_data:
         embed = discord.Embed(
