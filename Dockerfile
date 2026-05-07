@@ -14,8 +14,9 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# Discord bot — no HTTP port, just a long-running process.
 # ENV=production switches main.py to BOT_TOKEN_PROD.
 ENV ENV=production
+# /health endpoint exposed alongside the Discord WebSocket connection.
+EXPOSE 8080
 
 CMD ["python", "main.py"]
