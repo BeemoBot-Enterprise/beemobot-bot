@@ -71,13 +71,26 @@ def get_highest_rank_image(SoloQ, FlexQ):
     else:
         return 'https://static.wikia.nocookie.net/leagueoflegends/images/1/13/Season_2023_-_Unranked.png/revision/latest?cb=20231007211937'   
 
-def get_dominant_color(image_url):
-    response = requests.get(image_url, timeout=10)
-    if response.status_code != 200:
-        raise RuntimeError(f"Impossible de télécharger l'image depuis {image_url}")
+# Discord blurple — fallback color when an image can't be fetched (e.g. expired
+# CDN URL). Lots of embeds reference Discord attachment URLs that expire ~24h.
+DEFAULT_EMBED_COLOR = (88, 101, 242)
 
-    image = Image.open(BytesIO(response.content)).resize((50, 50)).convert('RGB')
-    return Counter(list(image.getdata())).most_common(1)[0][0]
+
+def get_dominant_color(image_url, fallback=DEFAULT_EMBED_COLOR):
+    try:
+        response = requests.get(image_url, timeout=5)
+        if response.status_code != 200:
+            logger.warning(
+                "dominant_color: %d for %s, falling back",
+                response.status_code,
+                image_url,
+            )
+            return fallback
+        image = Image.open(BytesIO(response.content)).resize((50, 50)).convert('RGB')
+        return Counter(list(image.getdata())).most_common(1)[0][0]
+    except Exception as exc:
+        logger.warning("dominant_color failed for %s: %s, falling back", image_url, exc)
+        return fallback
 
 
 def get_dominant_color_from_file(file_path):
