@@ -367,6 +367,30 @@ def embed_debrief(data: dict) -> discord.Embed:
     return embed
 
 
+def embed_predict(data: dict) -> discord.Embed:
+    """Embed for /predict — win probability based on rank averages."""
+    win_pct = data.get("winPct", 50)
+    color = 0x2ECC71 if win_pct >= 55 else 0xE74C3C if win_pct <= 45 else 0xF1C40F
+
+    self_team = str(data.get("self", {}).get("teamId", 100))
+    other_team = "200" if self_team == "100" else "100"
+    scores = data.get("teamScores", {})
+
+    description = (
+        f"**Probabilité de win** : `{win_pct}%`\n\n"
+        f"🟦 **Ton équipe** — score moyen `{scores.get(self_team, 0)}`\n"
+        f"🟥 **Adverse** — score moyen `{scores.get(other_team, 0)}`\n"
+        f"**Diff** : `{data.get('diff', 0)}`\n\n"
+        f"_{data.get('explanation', '')}_"
+    )
+
+    return discord.Embed(
+        title=f"🎯 Prédiction — {win_pct}%",
+        description=description,
+        color=color,
+    )
+
+
 def embed_last_game(match_data, name, region):
     if not match_data:
         embed = discord.Embed(
