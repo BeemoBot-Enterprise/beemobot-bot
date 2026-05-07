@@ -1,0 +1,26 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.git
+.github
+.claude
+.vscode
+.idea
+.DS_Store
+
+# Secrets — must be injected by Coolify
+.env
+.env.*
+
+# Virtualenvs
+venv
+env
+
+# Logs (rotated locally only)
+*.log
+Logs/logs_holder
+
+# Docs
+*.md
