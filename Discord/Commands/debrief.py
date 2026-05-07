@@ -1,3 +1,5 @@
+# Copyright (c) 2024-2026 BeemoBot Enterprise
+# All rights reserved.
 # Last updated: 2026-05-07
 import discord
 from Discord.Commands.api_beemo import get_debrief

@@ -13,14 +13,20 @@ def _internal_headers() -> dict[str, str]:
     return {"X-Internal-Key": INTERNAL_API_KEY} if INTERNAL_API_KEY else {}
 
 
-async def _request(method: str, path: str, json: dict | None = None, internal: bool = False):
+async def _request(
+    method: str,
+    path: str,
+    json: dict | None = None,
+    internal: bool = False,
+    expose_404: bool = False,
+):
     url = f"{BEEMO_API_BASE_URL}{path}"
     headers = _internal_headers() if internal else None
     try:
         async with aiohttp.ClientSession(timeout=DEFAULT_TIMEOUT) as session:
             async with session.request(method, url, json=json, headers=headers) as resp:
-                if resp.status == 404:
-                    # 404 may carry a structured error body — expose it to callers.
+                if resp.status == 404 and expose_404:
+                    # Caller asked to see structured 404 bodies (e.g. {"error": "not_linked"}).
                     try:
                         return await resp.json()
                     except Exception:
@@ -40,7 +46,7 @@ async def _request(method: str, path: str, json: dict | None = None, internal: b
 # ─── Public endpoints ─────────────────────────────────────────────────────────
 
 async def get_debrief(discord_id: str):
-    return await _request("GET", f"/lol/debrief/by-discord/{discord_id}")
+    return await _request("GET", f"/lol/debrief/by-discord/{discord_id}", expose_404=True)
 
 
 async def get_profile(puuid: str):
