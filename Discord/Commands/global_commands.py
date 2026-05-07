@@ -1,4 +1,5 @@
-# Last updated: 2026-05-06
+# Last updated: 2026-05-07
+import asyncio
 import typing
 import discord
 from discord import app_commands
@@ -53,7 +54,10 @@ def setup_global_commands(bot):
     async def lastgame_cmd(
         interaction: discord.Interaction, name: str, tag: str, region: REGION_LITERAL
     ):
+        # riotwatcher is sync and chains 3 Riot calls — would freeze the event
+        # loop and trip the 3s deadline. defer first, then offload to a thread.
+        await interaction.response.defer(ephemeral=True)
         region = region_real_name(region)
-        match_data = get_last_match_data(name, tag, region)
+        match_data = await asyncio.to_thread(get_last_match_data, name, tag, region)
         embed = embed_last_game(match_data, name, region)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed, ephemeral=True)

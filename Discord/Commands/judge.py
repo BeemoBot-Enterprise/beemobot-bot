@@ -1,4 +1,4 @@
-# Last updated: 2026-05-06
+# Last updated: 2026-05-07
 import discord
 from discord import app_commands
 from Discord.Commands.api_beemo import _request, get_eligible, give_rep
@@ -20,6 +20,7 @@ class JudgeView(discord.ui.View):
         button = discord.ui.Button(label=label, style=style, custom_id=f"{kind}-{self.match_id}")
 
         async def callback(interaction: discord.Interaction):
+            await interaction.response.defer(ephemeral=True)
             payload = {
                 "giverDiscordId": self.giver_discord_id,
                 "receiverPuuid": self.receiver_puuid,
@@ -29,12 +30,12 @@ class JudgeView(discord.ui.View):
             }
             result = await give_rep(payload)
             if result:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     f"✅ {kind.title()} envoyé pour le match `{self.match_id}` (weight {result['weight']})",
                     ephemeral=True,
                 )
             else:
-                await interaction.response.send_message("❌ Échec de l'envoi.", ephemeral=True)
+                await interaction.followup.send("❌ Échec de l'envoi.", ephemeral=True)
 
         button.callback = callback
         return button
@@ -44,14 +45,15 @@ def register_judge(bot):
     @bot.tree.command(name="judge", description="Juge un joueur que tu as croisé en game")
     @app_commands.describe(riot_id="Riot ID de la cible (ex: Nunch-N7789)")
     async def judge_cmd(interaction: discord.Interaction, riot_id: str):
+        await interaction.response.defer(ephemeral=True)
         target = await _request("GET", f"/lol/summoner/{riot_id}")
         if not target or not target.get("puuid"):
-            await interaction.response.send_message("❌ Riot ID introuvable.", ephemeral=True)
+            await interaction.followup.send("❌ Riot ID introuvable.", ephemeral=True)
             return
 
         me = await _request("GET", "/profile/by-discord/" + str(interaction.user.id))
         if not me or not me.get("puuid"):
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ Tu dois lier ton compte Riot d'abord — utilise `/link`.",
                 ephemeral=True,
             )
@@ -59,13 +61,13 @@ def register_judge(bot):
 
         eligible = await get_eligible(me["puuid"], target["puuid"])
         if not eligible or not eligible.get("matches"):
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ Aucun match commun trouvé dans tes 20 dernières games.",
                 ephemeral=True,
             )
             return
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"🎯 **Matches éligibles avec {target['gameName']}#{target['tagLine']}** :",
             ephemeral=True,
         )
