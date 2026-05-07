@@ -53,6 +53,10 @@ async def get_predict(discord_id: str):
     return await _request("GET", f"/lol/predict/by-discord/{discord_id}", expose_404=True)
 
 
+async def get_scout(discord_id: str):
+    return await _request("GET", f"/lol/scout/by-discord/{discord_id}", expose_404=True)
+
+
 async def get_profile(puuid: str):
     return await _request("GET", f"/profile/{puuid}")
 

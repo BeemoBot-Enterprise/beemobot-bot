@@ -391,6 +391,63 @@ def embed_predict(data: dict) -> discord.Embed:
     )
 
 
+def _format_team(participants: list) -> str:
+    if not participants:
+        return "_(aucun joueur)_"
+    lines = []
+    for p in participants:
+        rank = p.get("rank")
+        rank_str = f"{rank['tier'].title()} {rank['rank']}" if rank else "Unranked"
+        cs = p.get("championStats", {})
+        wr_str = f"{cs.get('winPct', 0)}% WR sur {cs.get('games', 0)}g" if cs.get("games", 0) >= 1 else ""
+        line = f"**{p.get('championName', '?')}** — {rank_str}"
+        if wr_str:
+            line += f" · {wr_str}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def embed_scout(data: dict) -> discord.Embed:
+    """Embed for /live — full scout of the current game."""
+    win_pct = data.get("predictionWinPct", 50)
+    color = 0xE74C3C  # red since user is in a tense moment
+
+    self_team = str(data.get("self", {}).get("teamId", 100))
+    other_team = "200" if self_team == "100" else "100"
+    teams = data.get("teams", {})
+
+    embed = discord.Embed(
+        title=f"🔴 Game détectée — {data.get('queueType', '?')}",
+        description=f"**Prédiction** : `{win_pct}%` win",
+        color=color,
+    )
+
+    embed.add_field(
+        name="🟦 Ton équipe",
+        value=_format_team(teams.get(self_team, [])),
+        inline=False,
+    )
+    embed.add_field(
+        name="🟥 Adverse",
+        value=_format_team(teams.get(other_team, [])),
+        inline=False,
+    )
+
+    threats = data.get("topThreats", [])
+    if threats:
+        threat_text = "\n".join(
+            f"⚠️ **{t.get('championName', '?')}** — {t.get('reason', '')}"
+            for t in threats
+            if t.get('championName')
+        )
+        if threat_text:
+            embed.add_field(name="🎯 Threats", value=threat_text, inline=False)
+
+    elapsed_min = data.get("gameLength", 0) // 60
+    embed.set_footer(text=f"Game {data.get('gameId', '?')} · {elapsed_min} min écoulées")
+    return embed
+
+
 def embed_last_game(match_data, name, region):
     if not match_data:
         embed = discord.Embed(
