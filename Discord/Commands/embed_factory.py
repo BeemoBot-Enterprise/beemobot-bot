@@ -381,7 +381,7 @@ def embed_predict(data: dict) -> discord.Embed:
         f"🟦 **Ton équipe** — score moyen `{scores.get(self_team, 0)}`\n"
         f"🟥 **Adverse** — score moyen `{scores.get(other_team, 0)}`\n"
         f"**Diff** : `{data.get('diff', 0)}`\n\n"
-        f"_{data.get('explanation', '')}_"
+        f"*{data.get('explanation', '')}*"
     )
 
     return discord.Embed(
