@@ -8,7 +8,6 @@ from Discord.Commands.global_commands import setup_global_commands
 logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
-intents.message_content = True
 
 
 class MyBot(commands.Bot):
