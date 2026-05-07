@@ -1,4 +1,4 @@
-# Last updated: 2026-05-06
+# Last updated: 2026-05-07
 import discord
 from discord import app_commands
 from Discord.Commands.api_beemo import _request
@@ -19,6 +19,7 @@ def register_setup(bot):
         if not interaction.guild_id:
             await interaction.response.send_message("Commande serveur uniquement.", ephemeral=True)
             return
+        await interaction.response.defer(ephemeral=True)
         result = await _request(
             "POST",
             f"/admin/guild/{interaction.guild_id}",
@@ -28,10 +29,10 @@ def register_setup(bot):
             },
         )
         if result:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"✅ Config mise à jour. Rep: {'on' if enabled else 'off'}, "
                 f"channel: {channel.mention if channel else 'aucun'}",
                 ephemeral=True,
             )
         else:
-            await interaction.response.send_message("❌ Échec.", ephemeral=True)
+            await interaction.followup.send("❌ Échec.", ephemeral=True)
