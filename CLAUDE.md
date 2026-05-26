@@ -113,6 +113,7 @@ Doc exhaustive : `beemobot-api/API.md` (66 KB).
 - **Username en DB** : format `name_tag` (underscore), pas `name#tag`. Concat faite côté bot avant `POST /game/*`
 - **Région Riot** : helpers `region_real_name` / `region_to_routing` côté bot ; côté API c'est dans `lol_controller.ts` et `riot_api_service.ts`
 - **Date / time** : Luxon côté API ; `datetime` ISO côté bot
+- **Commits** : aucun trailer `Co-Authored-By: Claude` ni mention d'un assistant IA dans les messages de commit. Les commits doivent apparaître comme du travail humain ordinaire, et **aucun signe extérieur d'usage d'IA ne doit transparaître** dans l'historique git, les PRs, ou les fichiers du repo.
 
 ## Workflow type — exemple `/shroom`
 
