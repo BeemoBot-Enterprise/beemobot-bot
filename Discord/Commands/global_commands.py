@@ -25,6 +25,7 @@ from Discord.Commands.predict import register_predict
 from Discord.Commands.live import register_live
 from Discord.Commands.lookup import register_lookup
 from Discord.Commands.build import register_build
+from Discord.Commands.claim import register_claim
 
 REGION_LITERAL = typing.Literal[
     "EUW", "EUNE", "NA", "BR", "JP", "KR", "LA", "LAS", "OC", "TR", "RU"
@@ -42,6 +43,7 @@ def setup_global_commands(bot):
     register_live(bot)
     register_lookup(bot)
     register_build(bot)
+    register_claim(bot)
 
     @bot.tree.command(name="help_orion", description="A message from Orion")
     async def help_orion_cmd(interaction: discord.Interaction):

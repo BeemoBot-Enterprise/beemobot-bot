@@ -21,6 +21,7 @@ def register_help(bot):
                 "`/predict` — Prédiction win% basée sur les ranks de la game\n"
                 "`/build` — 3 items à build en fonction du matchup\n"
                 "`/debrief` — Analyse heuristique de ta dernière game\n"
+                "`/claim` — Récupère 10 honey après une game (1 par game, dans les 10 min)\n"
                 "`/judge <riot_id>` — Donne un Shroom 🍄 ou Respect ⭐ après une game commune"
             ),
             inline=False,

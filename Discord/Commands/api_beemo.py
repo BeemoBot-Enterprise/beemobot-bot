@@ -69,6 +69,15 @@ async def get_profile_by_discord(discord_id: str):
     return await _request("GET", f"/profile/by-discord/{discord_id}", expose_404=True)
 
 
+async def claim_match_honey(discord_id: str):
+    """Claim 10 honey pour la dernière game si dans la fenêtre 10 min."""
+    return await _request(
+        "POST",
+        f"/economy/claim/by-discord/{discord_id}",
+        expose_404=True,
+    )
+
+
 async def get_lol_profile(riot_id: str, region: str):
     """Resolve un Riot ID arbitraire (existant ou non en DB BeemoBot) via
     l'endpoint LoL qui fait l'aller-retour vers Riot Account-v1 + Summoner-v4
