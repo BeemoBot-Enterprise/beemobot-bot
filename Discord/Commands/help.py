@@ -19,6 +19,7 @@ def register_help(bot):
                 "`/lookup <user|query>` — Cherche la réputation de quelqu'un d'autre\n"
                 "`/live` — Scout ta game en cours (rank, mastery, threats)\n"
                 "`/predict` — Prédiction win% basée sur les ranks de la game\n"
+                "`/build` — 3 items à build en fonction du matchup\n"
                 "`/debrief` — Analyse heuristique de ta dernière game\n"
                 "`/judge <riot_id>` — Donne un Shroom 🍄 ou Respect ⭐ après une game commune"
             ),
