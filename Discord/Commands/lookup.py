@@ -1,136 +1,146 @@
 # Copyright (c) 2024-2026 BeemoBot Enterprise
 # All rights reserved.
 """
-/lookup — chercher la réputation d'un autre joueur.
+/lookup name tag region — fiche complète d'un joueur LoL.
 
-Trois formes acceptées pour la cible :
-  /lookup user:@MonAmi          → résout via son Discord ID
-  /lookup query:"Nunch#N7789"   → résout via le Riot ID
-  /lookup query:"nunch"         → autocomplete textuel (premier match BeemoBot)
+Marche pour N'IMPORTE QUEL compte existant chez Riot, pas besoin d'avoir
+été touché par BeemoBot avant. Combine :
+  - Riot Account-v1 + Summoner-v4 (identité, niveau)
+  - League-v4 (rank SoloQ)
+  - Champion-mastery-v4 (champion main)
+  - Match-v5 (3 dernières games avec KDA + win/loss)
+  - BeemoBot /profile/:puuid (rep reçus + honey)
 
-Le résultat est public dans le channel, donc tout le monde voit qui a
-combien de shrooms / respects / honey.
+Embed compact — pensé pour être lu en 2 secondes pendant une game.
 """
+import typing
 import discord
 from discord import app_commands
 from config import WEBAPP_URL
-from Discord.Commands.api_beemo import (
-    get_profile,
-    get_profile_by_discord,
-    search_users,
-)
+from Riot.riot_toolbox import region_real_name
+from Discord.Commands.api_beemo import get_lol_profile, get_profile
+
+REGION_LITERAL = typing.Literal[
+    "EUW", "EUNE", "NA", "BR", "JP", "KR", "LA", "LAS", "OC", "TR", "RU"
+]
 
 
 def register_lookup(bot):
     @bot.tree.command(
         name="lookup",
-        description="Affiche la réputation d'un autre joueur (Discord mention ou Riot ID)",
+        description="Fiche complète d'un joueur LoL (rank, main, 3 dernières games, rep BeemoBot)",
     )
     @app_commands.describe(
-        user="Mention Discord du joueur (laisse vide si tu utilises query)",
-        query="Pseudo Discord, nom Riot ou Riot ID complet (Nunch#N7789)",
+        name="Game name du joueur (avant le #)",
+        tag="Tag line (après le #, sans le #)",
+        region="Serveur Riot du joueur",
     )
     async def lookup_cmd(
         interaction: discord.Interaction,
-        user: discord.User | None = None,
-        query: str | None = None,
+        name: str,
+        tag: str,
+        region: REGION_LITERAL,
     ):
         await interaction.response.defer()
-
-        # Catch-all : si quoi que ce soit pète dans le handler, on envoie
-        # un message d'erreur lisible au lieu de laisser Discord en
-        # spinner infini (l'interaction est défer mais sans followup,
-        # ce que le user voit comme un load qui tourne).
+        # Catch-all : éviter le spinner infini si quoi que ce soit pète.
         try:
-            if not user and not query:
+            platform = region_real_name(region)
+            riot_id = f"{name}-{tag}"
+
+            # 1) Riot full profile (existe pour tout compte LoL, pas que BeemoBot)
+            riot = await get_lol_profile(riot_id, platform)
+            if not riot or not isinstance(riot, dict) or not riot.get("summoner"):
                 await interaction.followup.send(
-                    "❌ Donne soit une mention `user:@joueur`, soit un texte `query:nom_ou_riot_id`."
+                    f"❌ Aucun invocateur trouvé pour **{name}#{tag}** sur **{region}**. "
+                    f"Vérifie l'orthographe du nom, du tag et de la région."
                 )
                 return
 
-            # 1. Mention Discord → résolution directe via /profile/by-discord
-            resolved = None
-            if user:
-                resolved = await get_profile_by_discord(str(user.id))
-                display_who = user.display_name
-                display_avatar = user.display_avatar.url
-            else:
-                # 2. Texte libre → /profile/search prend en charge Discord ET Riot
-                #    et splitte si tag détecté. search_users encode l'URL pour
-                #    pas que le # du Riot ID casse le query string.
-                search = await search_users(query or "", limit=1)
-                results = (search or {}).get("results", []) if isinstance(search, dict) else []
-                first = results[0] if results else None
-                if not first:
-                    await interaction.followup.send(
-                        f"❌ Aucun joueur trouvé pour `{query}`. Vérifie l'orthographe ou tape le Riot ID complet (`Nunch#N7789`)."
-                    )
-                    return
-                resolved = first
-                display_who = first.get("username") or first.get("gameName") or "Joueur"
-                display_avatar = first.get("avatarUrl") or None
+            summoner = riot["summoner"]
+            ranks = riot.get("ranks") or []
+            top_champs = riot.get("topChampions") or []
+            recent = riot.get("recentMatches") or []
 
-            # Si pas de PUUID, on peut quand même afficher l'identité Discord mais
-            # pas de réputation (pas de PUUID = pas de reputation_events).
-            if not resolved or not resolved.get("puuid"):
-                embed = discord.Embed(
-                    title=f"{display_who} — compte non lié",
-                    description=(
-                        f"Ce joueur n'a pas encore lié son compte Riot.\n\n"
-                        f"Profil web : {WEBAPP_URL}/search"
-                    ),
-                    color=0x5865F2,
-                )
-                if display_avatar:
-                    embed.set_thumbnail(url=display_avatar)
-                await interaction.followup.send(embed=embed)
-                return
-
-            profile = await get_profile(resolved["puuid"])
-            if not profile:
-                await interaction.followup.send(
-                    "❌ Profil introuvable côté serveur. Réessaie."
-                )
-                return
-
-            counts = profile.get("counts") or {"respects": 0, "shrooms": 0}
+            # 2) BeemoBot rep (zéro si compte jamais vu par Beemo)
+            beemo = await get_profile(summoner["puuid"]) or {}
+            counts = beemo.get("counts") or {"respects": 0, "shrooms": 0}
             respects = counts.get("respects", 0)
             shrooms = counts.get("shrooms", 0)
-            honey = profile.get("honey", 0)
+            honey = beemo.get("honey", 0)
             net = respects - shrooms
-            game_name = profile.get("gameName")
-            tag_line = profile.get("tagLine")
-            title = game_name or display_who
-            if tag_line:
-                title = f"{title}#{tag_line}"
 
+            # 3) Embed compact
             embed = discord.Embed(
-                title=title,
-                url=(
-                    f"{WEBAPP_URL}/profile/{game_name}-{tag_line}"
-                    if game_name and tag_line
-                    else None
-                ),
+                title=f"{summoner.get('gameName', name)}#{summoner.get('tagLine', tag)}",
+                url=f"{WEBAPP_URL}/profile/{name}-{tag}",
                 color=0xF5C242 if net >= 0 else 0xDC2626,
             )
-            if display_avatar:
-                embed.set_thumbnail(url=display_avatar)
-            embed.add_field(name="⭐ Respects", value=str(respects))
-            embed.add_field(name="🍄 Shrooms", value=str(shrooms))
-            embed.add_field(name="🍯 Honey", value=str(honey))
-            embed.add_field(name="Score net", value=f"{net:+d}")
             embed.set_footer(
-                text=f"Demandé par {interaction.user.display_name}",
+                text=f"Niv {summoner.get('summonerLevel', '?')} · {region} · demandé par {interaction.user.display_name}",
                 icon_url=interaction.user.display_avatar.url,
             )
+
+            # Rank SoloQ ou unranked
+            solo = next(
+                (r for r in ranks if r.get("queueType") == "RANKED_SOLO_5x5"),
+                None,
+            )
+            if solo:
+                rank_value = (
+                    f"**{solo['tier']} {solo['rank']}** · {solo['leaguePoints']} LP\n"
+                    f"{solo['wins']}V / {solo['losses']}D · **{solo['winRate']}%** WR"
+                )
+                if solo.get("hotStreak"):
+                    rank_value += " 🔥"
+            else:
+                rank_value = "Unranked"
+            embed.add_field(name="🏆 SoloQ", value=rank_value, inline=True)
+
+            # Champion main
+            if top_champs:
+                t = top_champs[0]
+                embed.add_field(
+                    name="⭐ Champion main",
+                    value=(
+                        f"**{t['championName']}**\n"
+                        f"Niv {t['championLevel']} · {int(t['championPoints']):,} pts".replace(",", " ")
+                    ),
+                    inline=True,
+                )
+            else:
+                embed.add_field(name="⭐ Champion main", value="—", inline=True)
+
+            # Réputation BeemoBot (toujours montrée même si zéro)
+            if respects + shrooms + honey > 0:
+                rep_value = (
+                    f"⭐ {respects}  ·  🍄 {shrooms}  ·  🍯 {honey}\n"
+                    f"Score net : **{net:+d}**"
+                )
+            else:
+                rep_value = "Jamais reçu de rep BeemoBot."
+            embed.add_field(name="🤝 Réputation", value=rep_value, inline=False)
+
+            # 3 dernières games
+            if recent:
+                lines = []
+                for m in recent[:3]:
+                    p = m.get("participant") or {}
+                    champ = p.get("championName", "?")
+                    kda = f"{p.get('kills', 0)}/{p.get('deaths', 0)}/{p.get('assists', 0)}"
+                    result = "🏆" if p.get("win") else "💀"
+                    lines.append(f"{result} **{champ}** · KDA {kda}")
+                embed.add_field(
+                    name="🎮 3 dernières games",
+                    value="\n".join(lines),
+                    inline=False,
+                )
+
             await interaction.followup.send(embed=embed)
         except Exception as exc:
-            # Discord ne sort jamais cette interaction du state "loading"
-            # tant qu'on n'a pas followup.send — donc on ne peut JAMAIS
-            # laisser une exception sortir d'ici sans réponse.
+            # Discord laisse l'interaction en "loading" si on followup pas.
             try:
                 await interaction.followup.send(
-                    f"❌ Erreur lors du lookup : `{type(exc).__name__}`. Réessaie ou ouvre une issue."
+                    f"❌ Erreur lookup : `{type(exc).__name__}`. Vérifie le nom/tag/région."
                 )
             except Exception:
                 pass

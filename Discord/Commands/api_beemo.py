@@ -69,6 +69,19 @@ async def get_profile_by_discord(discord_id: str):
     return await _request("GET", f"/profile/by-discord/{discord_id}", expose_404=True)
 
 
+async def get_lol_profile(riot_id: str, region: str):
+    """Resolve un Riot ID arbitraire (existant ou non en DB BeemoBot) via
+    l'endpoint LoL qui fait l'aller-retour vers Riot Account-v1 + Summoner-v4
+    + League + Mastery + Match history. Utilisé par /lookup pour permettre
+    de chercher des joueurs jamais vus par BeemoBot."""
+    from urllib.parse import quote
+    encoded = quote(riot_id, safe="-")
+    return await _request(
+        "GET",
+        f"/lol/summoner/{encoded}/profile?region={region}",
+    )
+
+
 async def search_users(query: str, limit: int = 5):
     """Autocomplete par pseudo Discord ou Riot ID. Utilisé par /lookup.
 

@@ -16,7 +16,7 @@ def register_help(bot):
             value=(
                 "`/link` — Lie ton compte Discord à ton compte Riot\n"
                 "`/me` — Affiche TA réputation (auto-détecte ton Discord)\n"
-                "`/lookup <user|query>` — Cherche la réputation de quelqu'un d'autre\n"
+                "`/lookup <name> <tag> <region>` — Fiche complète d'un joueur LoL (rank, main, dernières games, rep)\n"
                 "`/live` — Scout ta game en cours (rank, mastery, threats)\n"
                 "`/predict` — Prédiction win% basée sur les ranks de la game\n"
                 "`/build` — 3 items à build en fonction du matchup\n"
