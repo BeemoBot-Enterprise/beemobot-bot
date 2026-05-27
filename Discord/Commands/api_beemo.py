@@ -70,10 +70,17 @@ async def get_profile_by_discord(discord_id: str):
 
 
 async def search_users(query: str, limit: int = 5):
-    """Autocomplete par pseudo Discord ou Riot ID. Utilisé par /lookup."""
+    """Autocomplete par pseudo Discord ou Riot ID. Utilisé par /lookup.
+
+    URL-encode le `query` parce que les Riot IDs contiennent un # qui
+    cassait l'URL (le # marque le fragment côté aiohttp et tout ce qui
+    suit était dropped — on cherchait juste 'Nunch' au lieu de 'Nunch#N7789').
+    """
+    from urllib.parse import quote
+    encoded = quote(query, safe="")
     return await _request(
         "GET",
-        f"/profile/search?q={query}&mode=both&limit={limit}",
+        f"/profile/search?q={encoded}&mode=both&limit={limit}",
     )
 
 
