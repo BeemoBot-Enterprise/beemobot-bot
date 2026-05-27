@@ -61,6 +61,18 @@ async def get_profile(puuid: str):
     return await _request("GET", f"/profile/{puuid}")
 
 
+async def get_profile_by_discord(discord_id: str):
+    return await _request("GET", f"/profile/by-discord/{discord_id}", expose_404=True)
+
+
+async def search_users(query: str, limit: int = 5):
+    """Autocomplete par pseudo Discord ou Riot ID. Utilisé par /lookup."""
+    return await _request(
+        "GET",
+        f"/profile/search?q={query}&mode=both&limit={limit}",
+    )
+
+
 async def get_eligible(giver_puuid: str, receiver_puuid: str):
     return await _request(
         "GET",

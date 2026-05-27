@@ -23,6 +23,7 @@ from Discord.Commands.help import register_help
 from Discord.Commands.debrief import register_debrief
 from Discord.Commands.predict import register_predict
 from Discord.Commands.live import register_live
+from Discord.Commands.lookup import register_lookup
 
 REGION_LITERAL = typing.Literal[
     "EUW", "EUNE", "NA", "BR", "JP", "KR", "LA", "LAS", "OC", "TR", "RU"
@@ -38,6 +39,7 @@ def setup_global_commands(bot):
     register_debrief(bot)
     register_predict(bot)
     register_live(bot)
+    register_lookup(bot)
 
     @bot.tree.command(name="help_orion", description="A message from Orion")
     async def help_orion_cmd(interaction: discord.Interaction):
@@ -53,9 +55,9 @@ def setup_global_commands(bot):
         embed, file_name = embed_runes(role)
         if file_name:
             file = discord.File(f"Runes/{file_name}", filename=file_name)
-            await interaction.response.send_message(embed=embed, file=file, ephemeral=True)
+            await interaction.response.send_message(embed=embed, file=file)
         else:
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed)
 
     @bot.tree.command(name="lastgame", description="Display the last game of a summoner")
     @app_commands.describe(name="The summoner name", tag="The tag of the user", region="The server region")
@@ -64,8 +66,8 @@ def setup_global_commands(bot):
     ):
         # riotwatcher is sync and chains 3 Riot calls — would freeze the event
         # loop and trip the 3s deadline. defer first, then offload to a thread.
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
         region = region_real_name(region)
         match_data = await asyncio.to_thread(get_last_match_data, name, tag, region)
         embed = embed_last_game(match_data, name, region)
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)

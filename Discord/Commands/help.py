@@ -15,10 +15,11 @@ def register_help(bot):
             name="⭐ Réputation",
             value=(
                 "`/link` — Lie ton compte Discord à ton compte Riot\n"
-                "`/live` — Scout ta game en cours (rank, mastery, threats des adversaires)\n"
+                "`/me` — Affiche TA réputation (auto-détecte ton Discord)\n"
+                "`/lookup <user|query>` — Cherche la réputation de quelqu'un d'autre\n"
+                "`/live` — Scout ta game en cours (rank, mastery, threats)\n"
                 "`/predict` — Prédiction win% basée sur les ranks de la game\n"
                 "`/debrief` — Analyse heuristique de ta dernière game\n"
-                "`/me <riot_id>` — Affiche ta réputation\n"
                 "`/judge <riot_id>` — Donne un Shroom 🍄 ou Respect ⭐ après une game commune"
             ),
             inline=False,
